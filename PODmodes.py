@@ -1,17 +1,7 @@
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
-import scipy.io
-from numpy import linalg as LA
-from sklearn.decomposition import PCA
-from sklearn.svm import SVC
-import matplotlib.animation as animation
-import time
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import rcParams
 from PIL import Image
-from scipy import interpolate
 from sklearn.decomposition import TruncatedSVD
 
 
@@ -27,35 +17,20 @@ fileList = glob.glob("testfiles/Cam2_0_0_*.bmp")
 for idx, filename in enumerate(fileList):
     data[idx] = np.array(Image.open(filename).convert('L'))
 
-fig = plt.figure()
-plt.imshow(data[30], cmap='seismic', animated=True)
-plt.colorbar()
-plt.xlabel("y")
-plt.ylabel("x")
-plt.show()
 
 avg_matrix = np.mean(data, axis=0)
-
-
 plt.imshow(avg_matrix, cmap='seismic', animated=True)
 plt.colorbar()
 plt.xlabel("y")
 plt.ylabel("x")
 plt.show()
 
-plt.imshow(data[30]-avg_matrix, cmap='seismic', animated=True)
-plt.colorbar()
-plt.xlabel("y")
-plt.ylabel("x")
-plt.show()
-
-
-
+data_clean = data - avg_matrix
 
 
 # Reshape matrices into 1D arrays
-n_samples, n_rows, n_cols = data.shape
-data_1d = np.reshape(data, (n_samples, n_rows * n_cols))
+n_samples, n_rows, n_cols = data_clean.shape
+data_1d = np.reshape(data_clean, (n_samples, n_rows * n_cols))
 
 # Perform SVD-based POD
 n_components = 4
@@ -64,7 +39,6 @@ data_pod = svd.fit_transform(data_1d)
 
 # Create a 2x2 grid of subplots
 fig, axes = plt.subplots(nrows=2, ncols=2)
-
 # Plot the first 4 POD components in each subplot
 for i in range(4):
     row = i // 2
@@ -76,4 +50,34 @@ for i in range(4):
     ax.set_title(f'Mode {i+1}')
     fig.colorbar(im, ax=ax)
 
+plt.show()
+
+# Plot the time evolution of the first n_modes POD modes
+fig, ax = plt.subplots()
+t = np.arange(n_samples)
+n_modes=3
+for i in range(n_modes):
+    mode = data_pod[:, i]
+    ax.plot(t, mode, label=f'Mode {i+1}')
+ax.legend()
+ax.set_xlabel('Time')
+ax.set_ylabel('POD Coefficient')
+plt.show()
+
+
+plt.plot(data_pod[:, 0],data_pod[:, 1])
+plt.xlabel("a1")
+plt.ylabel("a2")
+plt.show()
+
+
+plt.plot(data_pod[:, 0],data_pod[:, 2])
+plt.xlabel("a1")
+plt.ylabel("a3")
+plt.show()
+
+
+plt.plot(data_pod[:, 1],data_pod[:, 2])
+plt.xlabel("a2")
+plt.ylabel("a3")
 plt.show()
