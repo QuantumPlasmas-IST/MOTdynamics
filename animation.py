@@ -13,8 +13,7 @@ from matplotlib import rcParams
 from PIL import Image
 from scipy import interpolate
 from sklearn.decomposition import TruncatedSVD
-
-
+from matplotlib.animation import FuncAnimation
 
 n_frames = 201
 frame_start = 0
@@ -36,22 +35,17 @@ plt.show()
 
 avg_matrix = np.mean(data, axis=0)
 
-
 plt.imshow(avg_matrix, cmap='seismic', animated=True)
 plt.colorbar()
 plt.xlabel("y")
 plt.ylabel("x")
 plt.show()
 
-plt.imshow(data[30]-avg_matrix, cmap='seismic', animated=True)
+plt.imshow(data[30] - avg_matrix, cmap='seismic', animated=True)
 plt.colorbar()
 plt.xlabel("y")
 plt.ylabel("x")
 plt.show()
-
-
-
-
 
 # Reshape matrices into 1D arrays
 n_samples, n_rows, n_cols = data.shape
@@ -73,7 +67,35 @@ for i in range(4):
     mode = svd.components_[i, :]
     mode = np.reshape(mode, (144, 144))
     im = ax.imshow(mode, cmap='seismic')
-    ax.set_title(f'Mode {i+1}')
+    ax.set_title(f'Mode {i + 1}')
     fig.colorbar(im, ax=ax)
 
+plt.show()
+
+fig, axes = plt.subplots(nrows=2, ncols=2)
+for i in range(4):
+    row = i // 2
+    col = i % 2
+    ax = axes[row, col]
+    im = ax.imshow(np.reshape(svd.components_[i, :], (144, 144)), cmap='Spectral')
+    ax.set_title(f'Mode {i + 1}')
+    fig.colorbar(im, ax=ax)
+plt.show()
+
+
+# Define the update function for the animation
+def update(frame):
+    im.set_data(np.reshape(svd.components_[1, :], (144, 144))*data_pod[frame, 1])
+    ax.set_title(f'frame {frame}')
+    return im,
+
+
+# Create the figure and axis for the animation
+fig, ax = plt.subplots()
+mode_re = np.reshape(svd.components_[1, :], (144, 144))
+im = ax.imshow(mode_re, cmap='seismic')
+fig.colorbar(im, ax=ax)
+
+# Create the animation
+anim = FuncAnimation(fig, update, interval=80)
 plt.show()
