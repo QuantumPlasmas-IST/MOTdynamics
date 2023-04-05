@@ -1,0 +1,3 @@
+[submodule "submodules/PySPOD"]
+	path = submodules/PySPOD
+	url = https://github.com/JoaoDRei/PySPOD
